@@ -1,6 +1,7 @@
 package httpdoc
 
 import (
+	"fmt"
 	"log"
 	"net/http"
 )
@@ -33,9 +34,13 @@ func GenerateHTTPDoc(w http.ResponseWriter, r *http.Request) {
 // Wrap 包装
 func Wrap(h http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		// do something
+		// do something before
+		fmt.Printf("before req: %+v, resp: %+v\n", r, w)
 
 		// 继续执行
 		h.ServeHTTP(w, r)
+
+		// do something after
+		fmt.Printf("after req: %+v, resp: %+v\n", r, w)
 	})
 }
