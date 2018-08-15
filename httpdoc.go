@@ -1,9 +1,11 @@
 package httpdoc
 
 import (
-	"fmt"
+	"bytes"
+	"encoding/json"
 	"log"
 	"net/http"
+	"os"
 )
 
 // GenerateHTTPDoc 生成HTTP接口文档
@@ -35,12 +37,55 @@ func GenerateHTTPDoc(w http.ResponseWriter, r *http.Request) {
 func Wrap(h http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		// do something before
-		fmt.Printf("before req: %+v, resp: %+v\n", r, w)
+		// fmt.Printf("before req: %+v, resp: %+v\n", r, w)
 
 		// 继续执行
 		h.ServeHTTP(w, r)
 
 		// do something after
-		fmt.Printf("after req: %+v, resp: %+v\n", r, w)
+		// fmt.Printf("after req: %+v, resp: %+v\n", r, w)
 	})
+}
+
+// HTTPDoc 文档
+type HTTPDoc struct {
+	Method string
+	URL    string
+	Param  []string
+	Return json.RawMessage
+}
+
+func generateHTTPDoc(r *http.Request, data []byte) {
+	var httpDoc HTTPDoc
+
+	// 方法
+	httpDoc.Method = r.Method
+
+	// 链接
+	httpDoc.URL = r.URL.String()
+
+	// 参数
+	switch r.Method {
+	case http.MethodGet:
+		values := r.URL.Query()
+		for key := range values {
+			httpDoc.Param = append(httpDoc.Param, key)
+		}
+	case http.MethodPost:
+		r.ParseForm()
+		values := r.PostForm
+		for key := range values {
+			httpDoc.Param = append(httpDoc.Param, key)
+		}
+	default:
+	}
+
+	// 返回
+	httpDoc.Return = json.RawMessage(data)
+
+	// encode
+	encodeData, _ := json.Marshal(httpDoc)
+	buf := new(bytes.Buffer)
+	json.Indent(buf, encodeData, "", "\t")
+	buf.WriteTo(os.Stdout)
 }
