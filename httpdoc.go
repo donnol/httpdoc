@@ -62,7 +62,7 @@ func generateHTTPDoc(r *http.Request, data []byte) {
 	httpDoc.Method = r.Method
 
 	// 链接
-	httpDoc.URL = r.URL.String()
+	httpDoc.URL = r.URL.Path
 
 	// 参数
 	switch r.Method {
@@ -88,4 +88,14 @@ func generateHTTPDoc(r *http.Request, data []byte) {
 	buf := new(bytes.Buffer)
 	json.Indent(buf, encodeData, "", "\t")
 	buf.WriteTo(os.Stdout)
+}
+
+// 将json格式数据转换为markdown
+func json2Markdown(data []byte) {
+
+}
+
+// 将json格式数据转换为结构体
+func json2Struct(data []byte) {
+
 }

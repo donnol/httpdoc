@@ -35,7 +35,7 @@ func TestMain(m *testing.M) {
 
 				w.Write(data)
 			})
-		mux.Handle("/", Wrap(handler))
+		mux.Handle("/get", Wrap(handler))
 		mux.HandleFunc("/add", func(w http.ResponseWriter, r *http.Request) {
 
 			result := map[string]int{
@@ -59,10 +59,11 @@ func TestMain(m *testing.M) {
 }
 
 func TestStartServer(t *testing.T) {
-	t.Run("/", func(t *testing.T) {
+	t.Run("/get", func(t *testing.T) {
 		var u url.URL
 		u.Host = "localhost" + addr
 		u.Scheme = "http"
+		u.Path = "/get"
 		q := u.Query()
 		q.Set("size", "10")
 		q.Set("offset", "0")
