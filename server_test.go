@@ -4,10 +4,8 @@ import (
 	"bytes"
 	"encoding/json"
 	"io/ioutil"
-	"log"
 	"net/http"
 	"net/url"
-	"os"
 	"testing"
 )
 
@@ -16,27 +14,37 @@ var addr = ":8080"
 func TestMain(m *testing.M) {
 	go func() {
 		mux := http.NewServeMux()
-		handler := http.HandlerFunc(
+		getHandler := http.HandlerFunc(
 			func(w http.ResponseWriter, r *http.Request) {
 				q := r.URL.Query()
-				log.Printf("%+v\n", q)
+				_ = q
+				// fmt.Printf("param is %+v\n", q)
 
 				result := Return{
 					Total: 10,
-					List:  []string{"jd"},
+					List: []struct {
+						Name string `json:"name"`
+					}{
+						{Name: "jd"},
+					},
 				}
 				data, err := json.Marshal(result)
 				if err != nil {
 					panic(err)
 				}
 
-				// 生成文档
-				generateHTTPDoc(r, data)
-
 				w.Write(data)
 			})
-		mux.Handle("/get", Wrap(handler))
-		mux.HandleFunc("/add", func(w http.ResponseWriter, r *http.Request) {
+		mux.Handle("/get", Wrap(getHandler))
+		addHandler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			var param struct {
+				Name string `json:"name"`
+				Age  int    `json:"age"`
+			}
+			if err := json.NewDecoder(r.Body).Decode(&param); err != nil {
+				panic(err)
+			}
+			// fmt.Printf("param is %+v\n", param)
 
 			result := map[string]int{
 				"id": 1,
@@ -47,11 +55,9 @@ func TestMain(m *testing.M) {
 				panic(err)
 			}
 
-			// 生成文档
-			generateHTTPDoc(r, data)
-
 			w.Write(data)
 		})
+		mux.Handle("/add", Wrap(addHandler))
 		StartServer(addr, mux)
 	}()
 
@@ -86,9 +92,12 @@ func TestStartServer(t *testing.T) {
 		if err != nil {
 			t.Fatal(err)
 		}
-		var buf = new(bytes.Buffer)
-		json.Indent(buf, data, "", "\t")
-		buf.WriteTo(os.Stdout)
+		_ = data
+		// fmt.Println("returns:")
+		// var buf = new(bytes.Buffer)
+		// json.Indent(buf, data, "", "\t")
+		// buf.WriteTo(os.Stdout)
+		// fmt.Println("")
 	})
 
 	t.Run("/add", func(t *testing.T) {
@@ -97,7 +106,7 @@ func TestStartServer(t *testing.T) {
 		u.Scheme = "http"
 		u.Path = "/add"
 		var body = new(bytes.Buffer)
-		body.WriteString(`name=jd&name=ja&age=20`)
+		body.WriteString(`{"name": "jd","age": 20}`)
 		req, err := http.NewRequest(http.MethodPost, u.String(), body)
 		if err != nil {
 			t.Fatal(err)
@@ -115,8 +124,11 @@ func TestStartServer(t *testing.T) {
 		if err != nil {
 			t.Fatal(err)
 		}
-		var buf = new(bytes.Buffer)
-		json.Indent(buf, data, "", "\t")
-		buf.WriteTo(os.Stdout)
+		_ = data
+		// fmt.Println("returns:")
+		// var buf = new(bytes.Buffer)
+		// json.Indent(buf, data, "", "\t")
+		// buf.WriteTo(os.Stdout)
+		// fmt.Println("")
 	})
 }
