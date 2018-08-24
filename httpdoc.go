@@ -61,7 +61,7 @@ func Wrap(h http.Handler) http.Handler {
 		// 上面将r.Body的内容读了出来，要重新给它赋值
 		r.Body = ioutil.NopCloser(bytes.NewBuffer(body))
 
-		// 这是一个返回包装器
+		// 这是一个自定义ResponseWriter
 		mrw := &MyResponseWriter{
 			ResponseWriter: w,
 			buf:            &bytes.Buffer{},
@@ -103,6 +103,7 @@ func (h HTTPDoc) JSONPrint() {
 	fmt.Println("")
 }
 
+// getRequestParam 获取请求参数
 func getRequestParam(r *http.Request, body []byte) []string {
 	// 参数
 	var params []string
@@ -134,17 +135,17 @@ func getRequestParam(r *http.Request, body []byte) []string {
 	return params
 }
 
-// 将json格式数据转换为markdown
+// json2Markdown 将json格式数据转换为markdown
 func json2Markdown(data []byte) {
 
 }
 
-// 将json格式数据转换为结构体
+// json2Struct 将json格式数据转换为结构体
 func json2Struct(data []byte) {
 
 }
 
-// 接口类型转为字符串
+// interface2String 接口类型转为字符串
 func interface2String(v interface{}) string {
 	switch v.(type) {
 	case int:
