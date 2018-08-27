@@ -157,3 +157,9 @@ func interface2String(v interface{}) string {
 	}
 	return ""
 }
+
+// generateTestCase 生成测试用例
+// 根据上面得到的json文档，解析出参数名和参数类型，使用随机值填充，然后调用请求进行测试
+func generateTestCase() {
+
+}
